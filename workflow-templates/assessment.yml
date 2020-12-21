@@ -1,0 +1,30 @@
+name: Pipeline
+
+on: pull_request
+
+jobs:
+  run-assessment:
+    name: Run code assesment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.18'
+      - name: AJV
+        run: npm install --quiet -g ajv-cli@3.3.0
+      - name: PIP
+        run: pip install --quiet requests PyYAML PyJWT boto3
+      - name: Assessment
+        env:
+          HOST: https://api.staircaseapi.com
+        shell: bash
+        run: |
+          curl -sS $HOST/code-assessor/client --output assessment.py
+          python assessment.py > validationOutput.txt
+          cat validationOutput.txt
